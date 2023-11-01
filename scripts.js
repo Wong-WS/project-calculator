@@ -1,92 +1,86 @@
-// Create functions for basic math operations
-function add(a, b) {
-  return a + b;
-}
-
-function subtract(a, b) {
-  return a - b;
-}
-
-function multiply(a, b) {
-  return a * b;
-}
-
-function divide(a, b) {
-  if (b === 0) {
-    return "Error"; // Handle division by zero
-  }
-  return a / b;
-}
-
-// Variables to store calculator operation components
-let firstNumber = "";
 let operator = "";
-let secondNumber = "";
+let previousValue = "";
+let currentValue = "";
 
-function operate(operator, a, b) {
-    switch (operator) {
-        case "+":
-            return add(a, b);
-        case "-":
-            return subtract(a, b);
-        case "×":
-            return multiply(a, b);
-        case "÷":
-            return divide(a, b);
-        default:
-            return "Error";
-    }
-}
+document.addEventListener("DOMContentLoaded", function() {
+    let clear = document.querySelector(".clear");
+    let equal = document.querySelector(".equal");
+    let decimal = document.querySelector(".decimal");
 
-document.addEventListener("DOMContentLoaded", function () {
-    let displayValue = "";
-    const userInput = document.querySelector(".user-input");
-    const resultDisplay = document.querySelector(".result");
-    const clearButton = document.querySelector(".clear");
-    const equalButton = document.querySelector(".equal");
+    let numbers = document.querySelectorAll(".number");
+    let operators = document.querySelectorAll(".operator");
 
-    const numberButtons = document.querySelectorAll(".number");
-    const operatorButtons = document.querySelectorAll(".operator");
-    const decimalButton = document.querySelector(".decimal");
+    let previousScreen = document.querySelector(".previous");
+    let currentScreen = document.querySelector(".current");
 
-    numberButtons.forEach(function (button) {
-        button.addEventListener("click", function () {
-            const value = button.getAttribute("data-value");
-            displayValue += value;
-            updateDisplay();
-        });
-    });
+    numbers.forEach((number) => number.addEventListener("click", function(e){
+        handleNumber(e.target.textContent)
+        currentScreen.textContent = currentValue;
+    }))
 
-    operatorButtons.forEach(function (button) {
-        button.addEventListener("click", function () {
-            const value = button.getAttribute("data-value");
-            displayValue += value;
-            updateDisplay();
-        });
-    });
+    operators.forEach((op) => op.addEventListener("click", function (e){
+        handleOperator(e.target.textContent)
+        previousScreen.textContent = previousValue + " " + operator;
+        currentScreen.textContent = currentValue;
+    }))
 
-    clearButton.addEventListener("click", function () {
-        clearDisplay();
+    clear.addEventListener("click", function(){
+        previousValue = "";
+        currentValue = "";
+        operator = "";
+        previousScreen.textContent = currentValue;
+        currentScreen.textContent = currentValue;
     })
 
-    decimalButton.addEventListener("click", function () {
-        if (!displayValue.includes(".")) {
-            displayValue += ".";
-            updateDisplay();
+    equal.addEventListener("click", function(){
+        if(currentValue != "" && previousValue != ""){
+            calculate()
+            previousScreen.textContent = "";
+            currentScreen.textContent = previousValue;
         }
-    });
-    
-    
+    })
 
+    decimal.addEventListener("click", function(){
+        addDecimal();
+        currentScreen.textContent = currentValue;
+    })
+})
 
+function handleNumber(num) {
+    currentValue += num;
+}
 
-    function updateDisplay() {
-        userInput.textContent = displayValue;
+function handleOperator(op) {
+    operator = op;
+    previousValue = currentValue;
+    currentValue = "";
+}
+
+function calculate(){
+    previousValue = Number(previousValue);
+    currentValue = Number(currentValue);
+
+    if (operator === "+"){
+        previousValue += currentValue;
+    } else if (operator === "-"){
+        previousValue -= currentValue;
+    } else if (operator === "×"){
+        previousValue *= currentValue;
+    } else{
+        previousValue /= currentValue
     }
 
-    function clearDisplay() {
-        displayValue = "";
-        updateDisplay();
-        resultDisplay.textContent = "";
+    previousValue = roundNumber(previousValue);
+    previousValue = previousValue.toString();
+    currentValue = previousValue.toString();
+}
+
+function roundNumber(num){
+    return Math.round(num * 1000) / 1000;
+}
+
+function addDecimal(){
+    if(!currentValue.includes(".")){
+        currentValue += ".";
     }
-});
+}
